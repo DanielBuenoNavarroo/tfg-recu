@@ -1,0 +1,57 @@
+@layer utilities {
+  .gradient-vertical {
+    background: linear-gradient(180deg, #12141d 0%, #12151f 100%);
+  }
+
+  .gradient-gray {
+    background: linear-gradient(270deg, #37363a 0%, #353637 100%);
+  }
+
+  .gradient-blue {
+    background: linear-gradient(180deg, #232839 0%, #12141d 100%);
+  }
+
+  /* Auth */
+  .auth-container {
+    @apply relative flex flex-col-reverse text-light-100 sm:flex-row;
+  }
+
+  .auth-form {
+    @apply my-auto flex h-full min-h-screen flex-1 items-center bg-pattern bg-cover bg-top bg-dark-100 px-5 py-10;
+  }
+
+  .auth-box {
+    @apply gradient-vertical mx-auto flex max-w-xl flex-col gap-6 rounded-lg p-10;
+  }
+
+  .auth-illustration {
+    @apply sticky h-40 w-full sm:top-0 sm:h-screen sm:flex-1;
+  }
+
+  /* Root */
+  .root-container {
+    @apply flex min-h-screen flex-1 flex-col bg-pattern bg-cover bg-top bg-dark-100 px-5 xs:px-10 md:px-16;
+  }
+
+  /* Book Details */
+  .book-details {
+    @apply lg:mt-36 mt-16 mb-20 flex flex-col gap-16 lg:flex-row;
+  }
+
+  .book-details h3 {
+    @apply text-xl font-semibold text-primary;
+  }
+
+  /* Library */
+  .library {
+    @apply mx-auto flex max-w-xl w-full flex-col text-center;
+  }
+
+  .library-subtitle {
+    @apply text-lg font-semibold uppercase text-light-100;
+  }
+
+  .library-title {
+    @apply mt-2 text-3xl font-semibold text-white xs:text-5xl;
+  }
+}
