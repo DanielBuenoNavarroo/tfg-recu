@@ -1,3 +1,5 @@
+import { Book, Bookmark, Home, User, Users } from "lucide-react";
+
 export const sampleBooks = [
   {
     id: 1,
@@ -148,3 +150,31 @@ export const FIELD_TYPES = {
   universityId: "number",
   password: "password",
 };
+
+export const adminSideBarLinks = [
+  {
+    img: Home,
+    route: "/admin",
+    text: "Home",
+  },
+  {
+    img: Users,
+    route: "/admin/users",
+    text: "All Users",
+  },
+  {
+    img: Book,
+    route: "/admin/books",
+    text: "All Books",
+  },
+  {
+    img: Bookmark,
+    route: "/admin/book-requests",
+    text: "Borrow Requests",
+  },
+  {
+    img: User,
+    route: "/admin/account-requests",
+    text: "Account Requests",
+  },
+];

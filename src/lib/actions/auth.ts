@@ -31,7 +31,7 @@ export const signInWithCredentials = async ({
 
     return { success: true };
   } catch (e) {
-    return { success: false, error: "Signin error" };
+    return { success: false, error: "SignIn error" };
   }
 };
 
@@ -69,6 +69,6 @@ export const signUp = async ({
     return { success: true };
   } catch (e) {
     console.log(e);
-    return { success: false, error: "Signup error" };
+    return { success: false, error: "SignUp error" };
   }
 };
