@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/preserve-manual-memoization */
 "use client";
 
 import ColumnHeader from "@/components/admin/ColumnHeader";
 import ConfirmAlert from "@/components/admin/ConfirmAlert";
 import DataTable from "@/components/admin/DataTable";
 import EditUserSheet, {
-  FormType,
+  UpdateUserFormType,
 } from "@/components/admin/sheets/EditUserSheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,16 +19,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Edit,
-  LockKeyhole,
-  LockKeyholeOpen,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import AddUserSheet, {
+  AddUserFormType,
+} from "@/components/admin/sheets/AddUserSheet";
 
-type AlertType = "delete" | "activate" | "block";
+type AlertType = "delete";
 
 const Page = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -112,15 +108,15 @@ const Page = () => {
                 "inline-block px-2 py-0.5 rounded-md",
                 user.status === "BLOCKED"
                   ? "bg-orange-100 text-orange-700"
-                  : user.status === "APROVED"
+                  : user.status === "APPROVED"
                   ? "bg-green-100 text-green-700"
                   : "bg-yellow-200 text-black"
               )}
             >
               {user.status === "BLOCKED"
                 ? "Blocked"
-                : user.status === "APROVED"
-                ? "Aproved"
+                : user.status === "APPROVED"
+                ? "Approved"
                 : "Pending"}
             </div>
           );
@@ -194,18 +190,18 @@ const Page = () => {
     }
   };
 
-  const handleUpdateStatus = async ({
+  const handleUpdateUser = async ({
     name: fullName,
     email,
     status,
     role,
-  }: FormType) => {
+  }: UpdateUserFormType) => {
     if (!selectedUser) return false;
     try {
       const res = await fetch(`/api/v1/users/${selectedUser.id}`, {
         method: "PUT",
         headers: {
-          "Contetn-Type": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           fullName,
@@ -229,6 +225,44 @@ const Page = () => {
       return true;
     } catch (e) {
       toast.error("Failed to update user");
+      console.error(e);
+      return false;
+    }
+  };
+
+  const handleAddUser = async ({
+    name: fullName,
+    email,
+    password,
+    status,
+    role,
+  }: AddUserFormType) => {
+    try {
+      const res = await fetch(`/api/v1/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName,
+          email,
+          password,
+          status,
+          role,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}`);
+      }
+
+      const data: User = await res.json();
+      setUsers((prev) => [...prev, data]);
+      toast.success("User added succesfully");
+
+      return true;
+    } catch (e) {
+      toast.error("Failed to add user");
       console.error(e);
       return false;
     }
@@ -263,6 +297,12 @@ const Page = () => {
           onConfrim={alertType === "delete" ? handleDelete : () => {}}
         />
 
+        <AddUserSheet
+          open={openAddUserSheet}
+          onOpenChange={setOpenAddUserSheet}
+          handleAddUser={handleAddUser}
+        />
+
         {selectedUser && openEditUserSheet && (
           <EditUserSheet
             open={openEditUserSheet}
@@ -270,7 +310,7 @@ const Page = () => {
               setOpenEditUserSheet(openState);
               setSelectedUser(undefined);
             }}
-            handleUpdateStatus={handleUpdateStatus}
+            handleUpdateUser={handleUpdateUser}
             selected={selectedUser}
           />
         )}

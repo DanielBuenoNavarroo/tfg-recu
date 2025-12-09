@@ -8,6 +8,7 @@ import { signIn } from "@/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ratelimit from "../ratelimit";
+import { AuthCredentials } from "@/types";
 
 export const signInWithCredentials = async ({
   email,

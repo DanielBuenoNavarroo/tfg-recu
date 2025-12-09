@@ -1,5 +1,5 @@
-import { User } from "@/types/index";
 import { DialogProps } from "@radix-ui/react-dialog";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Sheet,
@@ -8,9 +8,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getInitials, minimize } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -20,74 +17,64 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { minimize } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
-export type UpdateUserFormType = {
+export type AddUserFormType = {
   name: string;
   email: string;
+  password: string;
   status: "PENDING" | "APPROVED" | "BLOCKED";
   role: "AUTHOR" | "ADMIN" | "DEFAULT";
 };
 
 type Props = DialogProps & {
-  selected: User;
-  handleUpdateUser: ({
+  handleAddUser: ({
     name,
     email,
+    password,
     status,
     role,
-  }: UpdateUserFormType) => Promise<boolean>;
+  }: AddUserFormType) => Promise<boolean>;
 };
 
-const EditUserSheet = ({
-  onOpenChange,
-  selected,
-  handleUpdateUser,
-  ...props
-}: Props) => {
+const AddUserSheet = ({ onOpenChange, handleAddUser, ...props }: Props) => {
   const [processing, setProcessing] = useState(false);
 
-  const form = useForm<UpdateUserFormType>({
+  const form = useForm<AddUserFormType>({
     defaultValues: {
-      name: selected.fullName,
-      email: selected.email,
-      status: selected.status,
-      role: selected.role,
+      name: "",
+      email: "",
+      password: "",
+      status: "APPROVED",
+      role: "DEFAULT",
     },
   });
 
-  const onSubmit = async (values: UpdateUserFormType) => {
+  const onSubmit = async (values: AddUserFormType) => {
     setProcessing(true);
     console.log(values);
-    if (await handleUpdateUser(values)) {
+    if (await handleAddUser(values)) {
       onOpenChange?.(false);
     }
     setProcessing(false);
   };
-
   return (
     <Sheet onOpenChange={onOpenChange} {...props}>
       <SheetContent className="p-4 flex flex-col items-center w-full">
         <SheetHeader>
           <SheetTitle className="text-2xl flex flex-col">
-            Update User
-            <span className="text-sm text-slate-400">{selected.fullName}</span>
+            Create new user
           </SheetTitle>
           <SheetDescription />
         </SheetHeader>
-
-        <Avatar className="w-20 h-20 mt-5 text-xl">
-          <AvatarFallback>
-            {getInitials(selected.fullName || "IN")}
-          </AvatarFallback>
-        </Avatar>
 
         <Form {...form}>
           <form
@@ -118,6 +105,21 @@ const EditUserSheet = ({
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Password */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,10 +179,9 @@ const EditUserSheet = ({
                 </FormItem>
               )}
             />
-
             <Button disabled={processing}>
               {processing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {!processing ? "Update" : "Updating..."}
+              {!processing ? "Add" : "Adding..."}
             </Button>
           </form>
         </Form>
@@ -189,4 +190,4 @@ const EditUserSheet = ({
   );
 };
 
-export default EditUserSheet;
+export default AddUserSheet;

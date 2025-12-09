@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ROLE_ENUM, STATUS_ENUM } from "@/db/schema";
+import { GENRE_ENUM, ROLE_ENUM, STATUS_ENUM } from "@/db/schema";
 
 const BASE_STRING_LENGTH = 3;
 const BASE_PASSWORD_LENGTH = 8;
@@ -27,5 +27,13 @@ export const userSchema = z.object({
 
 export const bookSchema = z.object({
   title: z.string().trim().min(2).max(100),
-  author: z.string().trim().min(2).max(100),
+  description: z.string().trim().min(2).max(100),
+  genre: z.array(z.enum(GENRE_ENUM.enumValues)).min(1),
+  coverImage: z.string().optional(),
+  coverColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9A-F]{6}$/i),
 });
+
+export type bookSchemaType = z.infer<typeof bookSchema>;

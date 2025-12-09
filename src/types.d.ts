@@ -1,21 +1,29 @@
+import { GENRE_ENUM } from "./db/schema";
+
 interface Book {
   id: number;
   title: string;
-  author: string;
-  genre: string;
+  authorId: string;
+  genre: (typeof GENRE_ENUM.enumValues)[number][];
   rating: number;
-  total_copies: number;
-  available_copies: number;
   description: string;
   color: string;
   cover: string;
-  video: string;
-  summary: string;
-  isLoanedBook?: boolean;
+  lastUpdated: Date;
+  createdAt: Date;
 }
 
 interface AuthCredentials {
   fullName: string;
   email: string;
   password: string;
+}
+
+interface BookParams {
+  title: string;
+  genre: (typeof GENRE_ENUM.enumValues)[number][];
+  description: string;
+  coverImage?: string;
+  coverColor: string;
+  rating?: number;
 }

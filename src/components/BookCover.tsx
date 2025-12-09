@@ -16,14 +16,14 @@ interface Props {
   className?: string;
   variant?: BookCoverVariant;
   coverColor: string;
-  coverUrl: string;
+  coverUrl?: string;
 }
 
 const BookCover = ({
   className,
   variant = "regular",
   coverColor = "#012B48",
-  coverUrl = "https://placehold.co/400x600.png",
+  coverUrl = "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 }: Props) => {
   return (
     <div
