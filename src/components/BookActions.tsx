@@ -27,8 +27,9 @@ const BookActions = ({ book, setOwnBooks }: Props) => {
       <DeleteBookDialog
         open={showDeleteDialog}
         setOpen={setShowDeleteDialog}
-        bookId={book.id.toString()}
+        bookId={book.id}
         bookName={book.title}
+        setOwnBooks={setOwnBooks}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

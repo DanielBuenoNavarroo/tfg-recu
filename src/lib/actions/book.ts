@@ -2,10 +2,14 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { books } from "@/db/schema";
-import { publicBookFields } from "@/db/selects";
+import { books, reviews, reviewVotes, users } from "@/db/schema";
+import {
+  publicBookFields,
+  publicReviewsFields,
+  publicUserFields,
+} from "@/db/selects";
 import { BookParams } from "@/types";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export const createBook = async ({
   title,
@@ -95,6 +99,32 @@ export const updateBook = async ({
   }
 };
 
+export const deleteBookById = async (id: string) => {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const deleted = await db.delete(books).where(eq(books.id, id));
+
+    if (!deleted) {
+      throw new Error("Error");
+    }
+
+    return {
+      succes: true,
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      succes: false,
+      message: "An error occurred while deleting the book",
+    };
+  }
+};
+
 export const getBooksWithAuthorId = async (id: string) => {
   try {
     const session = await auth();
@@ -116,7 +146,81 @@ export const getBooksWithAuthorId = async (id: string) => {
     console.log(e);
     return {
       succes: false,
-      message: "An error occurred while createng the book",
+      message: "An error occurred while feching the book",
+    };
+  }
+};
+
+export const getBookById = async (id: string) => {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const result = await db
+      .select({
+        ...publicBookFields,
+        author: {
+          ...publicUserFields,
+        },
+      })
+      .from(books)
+      .leftJoin(users, eq(books.authorId, users.id))
+      .where(eq(books.id, id))
+      .limit(1);
+
+    const reviewsData = await db
+      .select({
+        ...publicReviewsFields,
+        user: { ...publicUserFields },
+        thumbsUp: sql<number>`COUNT(*) FILTER (WHERE ${reviewVotes.isLike} = true)`,
+        thumbsDown: sql<number>`COUNT(*) FILTER (WHERE ${reviewVotes.isLike} = false)`,
+        currentUserVote: sql<number | null>`
+      MAX(CASE WHEN ${reviewVotes.userId} = ${session.user.id} 
+               THEN ${reviewVotes.isLike}::int END)
+    `,
+      })
+      .from(reviews)
+      .leftJoin(users, eq(reviews.userId, users.id))
+      .leftJoin(reviewVotes, eq(reviewVotes.reviewId, reviews.id))
+      .where(eq(reviews.bookId, id))
+      .groupBy(reviews.id, users.id);
+
+    return {
+      succes: true,
+      data: result[0],
+      reviews: reviewsData,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      succes: false,
+      message: "An error occurred while fetching the book",
+    };
+  }
+};
+
+export const getBookByGenre = async (genres: string[]) => {
+  try {
+    const genreArray = sql.raw(
+      `ARRAY[${genres.map((g) => `'${g}'`).join(",")}]::genre[]`
+    );
+
+    const result = await db
+      .select(publicBookFields)
+      .from(books)
+      .where(
+        and(sql`${books.genre} && ${genreArray}`, eq(books.isPublic, true))
+      );
+
+    return { success: true, books: result };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      error: "Error fetching books by genre",
     };
   }
 };

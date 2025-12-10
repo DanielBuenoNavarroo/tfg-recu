@@ -4,11 +4,12 @@ import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { hash } from "bcryptjs";
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ratelimit from "../ratelimit";
 import { AuthCredentials } from "@/types";
+import { publicUserFields } from "@/db/selects";
 
 export const signInWithCredentials = async ({
   email,
@@ -71,5 +72,47 @@ export const signUp = async ({
   } catch (e) {
     console.log(e);
     return { success: false, error: "SignUp error" };
+  }
+};
+
+export const UserStatus = async () => {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated");
+  }
+
+  try {
+    const result = await db
+      .select({ status: users.status })
+      .from(users)
+      .where(eq(users.id, session.user.id));
+
+    const status = result[0]?.status;
+
+    return { success: true, status };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Error fetching user status" };
+  }
+};
+
+export const GetUserById = async (id: string) => {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated");
+  }
+
+  try {
+    const result = await db
+      .select(publicUserFields)
+      .from(users)
+      .where(eq(users.id, id));
+
+    return { success: true, result: result[0] };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Error fetching user" };
   }
 };

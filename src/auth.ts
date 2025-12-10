@@ -31,7 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!isPasswordValid) return null;
 
         return {
-          id: user[0].id.toString(),
+          id: user[0].id,
           email: user[0].email,
           name: user[0].fullName,
           role: user[0].role,

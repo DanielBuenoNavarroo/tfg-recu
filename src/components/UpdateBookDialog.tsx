@@ -55,7 +55,7 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
     setIsPending(true);
     const newValues = {
       ...values,
-      id: selected.id.toString(),
+      id: selected.id,
     };
     const result = await updateBook(newValues);
 

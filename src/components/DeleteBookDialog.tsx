@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,19 +12,39 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Input } from "./ui/input";
+import { deleteBookById } from "@/lib/actions/book";
+import { toast } from "sonner";
+import { Book } from "@/types";
 
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   bookName: string;
   bookId: string;
+  setOwnBooks: Dispatch<SetStateAction<Book[] | null>>;
 }
 
-const DeleteBookDialog = ({ bookId, bookName, open, setOpen }: Props) => {
+const DeleteBookDialog = ({
+  bookId,
+  bookName,
+  open,
+  setOpen,
+  setOwnBooks,
+}: Props) => {
   const [confirmText, setConfirmText] = useState("");
   const [isPending, setIsPending] = useState(false);
 
-  const handleDelete = (id: string) => {};
+  const handleDelete = async (id: string) => {
+    setIsPending(true);
+    const res = await deleteBookById(id);
+    if (res.succes) {
+      toast.success("Book deleted correctly");
+      setOwnBooks((prev) =>
+        prev ? prev.filter((book) => book.id !== id) : prev
+      );
+    } else toast.error("Failed to delete the book");
+    setIsPending(false);
+  };
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent className="bg-slate-900">
@@ -53,8 +73,6 @@ const DeleteBookDialog = ({ bookId, bookName, open, setOpen }: Props) => {
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={confirmText !== bookName || isPending}
             onClick={async () => {
-              //   toast.loading("Deleting workflow...", { id: bookId });
-              console.log("workflowId", bookId);
               handleDelete(bookId);
             }}
           >

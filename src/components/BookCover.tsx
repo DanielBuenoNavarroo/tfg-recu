@@ -15,7 +15,7 @@ const variantStyles: Record<BookCoverVariant, string> = {
 interface Props {
   className?: string;
   variant?: BookCoverVariant;
-  coverColor: string;
+  coverColor?: string;
   coverUrl?: string;
 }
 
@@ -28,7 +28,7 @@ const BookCover = ({
   return (
     <div
       className={cn(
-        "relative transition-all duration-300",
+        "relative transition-all duration-300 min-w-44",
         variantStyles[variant],
         className
       )}

@@ -27,7 +27,7 @@ export const userSchema = z.object({
 
 export const bookSchema = z.object({
   title: z.string().trim().min(2).max(100),
-  description: z.string().trim().min(2).max(100),
+  description: z.string().trim().min(2).max(255),
   genre: z.array(z.enum(GENRE_ENUM.enumValues)).min(1),
   coverImage: z.string().optional(),
   coverColor: z
@@ -36,4 +36,11 @@ export const bookSchema = z.object({
     .regex(/^#[0-9A-F]{6}$/i),
 });
 
+export const reviewSchema = z.object({
+  rating: z.number().min(1).max(5),
+  title: z.string().trim().min(2).max(100),
+  description: z.string().trim().min(2).max(255),
+});
+
 export type bookSchemaType = z.infer<typeof bookSchema>;
+export type reviewSchemaType = z.infer<typeof reviewSchema>;

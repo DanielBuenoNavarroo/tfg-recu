@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { bookSchema, bookSchemaType } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,12 +26,14 @@ import { ScrollArea } from "./ui/scroll-area";
 import ColorPicker from "./ColorPicker";
 import { createBook } from "@/lib/actions/book";
 import { toast } from "sonner";
+import { Book } from "@/types";
 
 interface Props {
   triggerText?: string;
+  setOwnBooks: Dispatch<SetStateAction<Book[] | null>>;
 }
 
-const CreateBookDialog = ({ triggerText }: Props) => {
+const CreateBookDialog = ({ triggerText, setOwnBooks }: Props) => {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
@@ -54,6 +56,8 @@ const CreateBookDialog = ({ triggerText }: Props) => {
 
     if (result.succes) {
       toast("Book created successfully");
+      setOwnBooks((prev) => [...(prev ?? []), result.data]);
+      setOpen(false);
     } else {
       toast("Failed to create the book");
     }

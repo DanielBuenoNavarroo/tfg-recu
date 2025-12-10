@@ -1,20 +1,16 @@
 import { Book, Star } from "lucide-react";
-import Image from "next/image";
 import { Button } from "./ui/button";
 import BookCover from "./BookCover";
+import { Book as BookType } from "@/types";
 
 const BookHero = ({
-  author,
-  available_copies,
   color,
   cover,
   description,
   genre,
   id,
-  rating,
   title,
-  total_copies,
-}: Book) => {
+}: BookType) => {
   return (
     <section className="mt-20 flex flex-col-reverse items-center gap-12 sm:gap-32 xl:flex-row xl:gap-8">
       <div className="flex flex-1 flex-col gap-5">
