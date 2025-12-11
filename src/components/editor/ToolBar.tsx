@@ -11,9 +11,10 @@ import {
   List,
   ListOrdered,
   Pilcrow,
+  Save,
   Underline,
 } from "lucide-react";
-import { Button, ButtonVariant } from "../ui/button";
+import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
     toggleBulletList: () => boolean | undefined;
     addImage: () => void;
     addLink: () => void;
+    saveContent: () => void;
   };
   editorState: {
     isBold: boolean | undefined;
@@ -46,11 +48,11 @@ interface Props {
   } | null;
 }
 
-const BTN_VARIANT: ButtonVariant = "ghost";
+const BTN_VARIANT = "ghost";
 
 const ToolBar = ({ commands, editorState }: Props) => {
   return (
-    <nav className="bg-white w-full fixed top-0 left-0 z-10 flex justify-between p-2 shadow-custom">
+    <nav className="bg-white w-full fixed top-0 left-0 z-10 flex justify-between items-center p-2 shadow-custom px-2 md:px-4 lg:px-8 xl:px-12 2xl:px-20">
       <div className="">
         <Button
           variant={BTN_VARIANT}
@@ -152,6 +154,16 @@ const ToolBar = ({ commands, editorState }: Props) => {
           <Link />
         </Button>
       </div>
+      <Button
+        variant={"outline"}
+        className="bg-slate-800!"
+        onClick={() => {
+          commands.saveContent();
+        }}
+      >
+        Save
+        <Save />
+      </Button>
     </nav>
   );
 };

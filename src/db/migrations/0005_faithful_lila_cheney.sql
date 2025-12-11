@@ -1,0 +1,1 @@
+ALTER TABLE "chapters" ADD COLUMN "public_date" timestamp;

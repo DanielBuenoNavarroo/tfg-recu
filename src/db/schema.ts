@@ -143,6 +143,7 @@ export const chapterGroups = pgTable("chapter_groups", {
     .references(() => books.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   order: integer("order").default(0),
+  isPublic: boolean("is_public").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -155,9 +156,11 @@ export const chapters = pgTable("chapters", {
     onDelete: "set null",
   }),
   order: integer("order").notNull(),
-  title: varchar("title", { length: 255 }),
+  title: varchar("title", { length: 255 }).notNull(),
   visits: integer("visits").default(0),
-  content: text("content").notNull(),
+  isPublic: boolean("is_public").notNull().default(false),
+  publicDate: timestamp("public_date", { withTimezone: true }),
+  content: text("content").notNull().default(""),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

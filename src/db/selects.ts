@@ -37,6 +37,7 @@ export const publicChapterGroupFields = {
   id: chapterGroups.id,
   bookId: chapterGroups.bookId,
   name: chapterGroups.name,
+  isPublic: chapterGroups.isPublic,
   order: chapterGroups.order,
   createdAt: chapterGroups.createdAt,
 };
@@ -45,6 +46,8 @@ export const publicChapterFields = {
   id: chapters.id,
   bookId: chapters.bookId,
   groupId: chapters.groupId,
+  isPublic: chapters.isPublic,
+  publicDate: chapters.publicDate,
   order: chapters.order,
   title: chapters.title,
   visits: chapters.visits,
@@ -97,6 +100,7 @@ export type ChapterGroupType = {
   id: string;
   bookId: string;
   name: string;
+  isPublic: boolean;
   order: number;
   createdAt: Date;
 };
@@ -105,9 +109,11 @@ export type ChapterType = {
   id: string;
   bookId: string;
   groupId: string | null;
+  isPublic: boolean;
   order: number;
   title: string | null;
   visits: number;
+  publicDate?: Date;
   lastUpdated: Date;
   createdAt: Date;
 };

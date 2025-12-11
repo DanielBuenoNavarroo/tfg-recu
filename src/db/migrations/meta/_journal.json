@@ -29,6 +29,20 @@
       "when": 1765326122025,
       "tag": "0003_high_shocker",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765383928282,
+      "tag": "0004_fair_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1765475405987,
+      "tag": "0005_faithful_lila_cheney",
+      "breakpoints": true
     }
   ]
 }

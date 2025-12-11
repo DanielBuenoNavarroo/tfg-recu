@@ -42,5 +42,6 @@ export const reviewSchema = z.object({
   description: z.string().trim().min(2).max(255),
 });
 
+
 export type bookSchemaType = z.infer<typeof bookSchema>;
 export type reviewSchemaType = z.infer<typeof reviewSchema>;

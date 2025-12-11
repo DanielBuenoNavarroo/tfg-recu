@@ -50,18 +50,18 @@ const Page = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full pt-10">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold">Books</h1>
           <p className="text-slate-300">Manage your books</p>
         </div>
         <CreateBookDialog setOwnBooks={setOwnBooks} />
       </div>
-      <div className="h-full py-8 flex gap-4 flex-wrap flex-row justify-between">
+      <div className="h-full py-8 flex gap-4 flex-wrap flex-row justify-around">
         {ownBooks.map((book) => (
-          <div key={book.id} className="">
+          <div key={book.id} className="mt-4">
             <Link href={`/created/${book.id}`}>
-              <BookCover coverColor={book.color} />
+              <BookCover coverColor={book.color} className="h-60!" />
             </Link>
             <div className="flex items-center justify-between mt-2">
               <h2 className="text-xl font-semibold truncate max-w-[133px]">{book.title}</h2>

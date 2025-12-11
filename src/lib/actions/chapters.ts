@@ -1,22 +1,21 @@
-"use server"
+"use server";
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { chapterGroups, chapters } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { publicChapterFields, publicChapterGroupFields } from "@/db/selects";
+import { asc, eq, sql } from "drizzle-orm";
 
 export const createChapter = async ({
   bookId,
   groupId,
   order,
   title,
-  content,
 }: {
   bookId: string;
   groupId?: string | null;
   order: number;
   title: string;
-  content: string;
 }) => {
   try {
     const session = await auth();
@@ -32,7 +31,7 @@ export const createChapter = async ({
         groupId: groupId ?? null,
         order,
         title,
-        content,
+        content: "",
       })
       .returning();
 
@@ -61,6 +60,8 @@ export const updateChapter = async (
     order: number;
     title: string;
     content: string;
+    isPublic: boolean;
+    publicDate?: Date;
     visits: number;
   }>
 ) => {
@@ -71,12 +72,22 @@ export const updateChapter = async (
       throw new Error("Not authenticated");
     }
 
+    const normalizedData: typeof data & { lastUpdated: Date } = {
+      ...data,
+      lastUpdated: new Date(),
+    };
+
+    if (data.publicDate && data.isPublic) {
+      normalizedData.publicDate = new Date(data.publicDate);
+    }
+
+    if (data.isPublic === false) {
+      normalizedData.publicDate = undefined;
+    }
+
     const updatedChapter = await db
       .update(chapters)
-      .set({
-        ...data,
-        lastUpdated: new Date(),
-      })
+      .set(normalizedData)
       .where(eq(chapters.id, id))
       .returning();
 
@@ -112,6 +123,21 @@ export const deleteChapter = async (id: string) => {
 
     if (!deletedChapter) {
       throw new Error("Error deleting chapter");
+    }
+
+    const { bookId } = deletedChapter[0];
+
+    const remaining = await db
+      .select()
+      .from(chapters)
+      .where(eq(chapters.bookId, bookId))
+      .orderBy(chapters.order, chapters.createdAt);
+
+    for (let i = 0; i < remaining.length; i++) {
+      await db
+        .update(chapters)
+        .set({ order: i + 1 })
+        .where(eq(chapters.id, remaining[i].id));
     }
 
     return {
@@ -150,7 +176,7 @@ export const createChapterGroup = async ({
         .from(chapterGroups)
         .where(eq(chapterGroups.bookId, bookId));
 
-      finalOrder = (result?.count ?? 0) + 1;
+      finalOrder = Number(result?.count ?? 0) + 1;
     }
 
     const newGroup = await db
@@ -235,6 +261,21 @@ export const deleteChapterGroup = async (id: string) => {
       throw new Error("Error deleting chapter group");
     }
 
+    const bookId = deletedGroup[0].bookId;
+
+    const remaining = await db
+      .select()
+      .from(chapterGroups)
+      .where(eq(chapterGroups.bookId, bookId))
+      .orderBy(chapterGroups.order);
+
+    for (let i = 0; i < remaining.length; i++) {
+      await db
+        .update(chapterGroups)
+        .set({ order: i + 1 })
+        .where(eq(chapterGroups.id, remaining[i].id));
+    }
+
     return {
       success: true,
       data: JSON.parse(JSON.stringify(deletedGroup[0])),
@@ -247,3 +288,81 @@ export const deleteChapterGroup = async (id: string) => {
     };
   }
 };
+
+export async function getBookData(bookId: string) {
+  try {
+    if (!bookId) {
+      throw new Error("Book ID is required");
+    }
+
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const groups = await db
+      .select(publicChapterGroupFields)
+      .from(chapterGroups)
+      .where(eq(chapterGroups.bookId, bookId))
+      .orderBy(asc(chapterGroups.order));
+
+    const chaps = await db
+      .select(publicChapterFields)
+      .from(chapters)
+      .where(eq(chapters.bookId, bookId))
+      .orderBy(asc(chapters.order));
+
+    return {
+      success: true,
+      data: {
+        groups,
+        chaps,
+      },
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      message: "An error occurred while fetching book data",
+    };
+  }
+}
+
+export async function getChapterById(chapterId: string) {
+  try {
+    if (!chapterId) {
+      throw new Error("Chapter ID is required");
+    }
+
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const chapter = await db
+      .select(publicChapterFields)
+      .from(chapters)
+      .where(eq(chapters.id, chapterId))
+      .limit(1);
+
+    if (!chapter || chapter.length === 0) {
+      return {
+        success: false,
+        message: "Chapter not found",
+      };
+    }
+
+    return {
+      success: true,
+      data: chapter[0],
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      message: "An error occurred while fetching chapter data",
+    };
+  }
+}
