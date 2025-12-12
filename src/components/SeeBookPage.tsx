@@ -3,7 +3,7 @@
 import BookCover from "@/components/BookCover";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ReviewWithUserType } from "@/db/selects";
+import { ChapterType, ReviewWithUserType } from "@/db/selects";
 import { useReviewVotes } from "@/hooks/useReviewVotes";
 import { getBookById } from "@/lib/actions/book";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { Book, User as UserType } from "@/types";
 import {
   Bookmark,
   Calendar,
+  ChevronRight,
   Eye,
   Plus,
   Star,
@@ -23,12 +24,15 @@ import { Session } from "next-auth";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NothingHereYet from "./NothingHereYet";
+import { getBookData } from "@/lib/actions/chapters";
 
 const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   const [book, setBook] = useState<Book | null>(null);
   const [author, setAuthor] = useState<UserType | null>(null);
   const [visits, setVisits] = useState<number>(0);
-  const [chapters, setChapters] = useState<string[]>([]);
+  const [nextChapter, setNextChapter] = useState<ChapterType>();
+  const [latestChapters, setLatestChapters] = useState<ChapterType[]>();
+  const [chapters, setChapters] = useState<ChapterType[]>([]);
 
   const {
     reviews,
@@ -39,6 +43,31 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
     removeReview,
   } = useReviewVotes(null);
 
+  const getVisits = (chapters: ChapterType[]) => {
+    setVisits(chapters.reduce((acc, c) => acc + c.visits, 0));
+  };
+
+  const getNextChapter = (chapters: ChapterType[]) => {
+    const now = new Date();
+    return chapters
+      .filter((c) => c.publicDate !== undefined && new Date(c.publicDate) > now)
+      .sort(
+        (a, b) =>
+          new Date(a.publicDate!).getTime() - new Date(b.publicDate!).getTime()
+      )[0];
+  };
+
+  const getLastChapters = (chapters: ChapterType[]) => {
+    const now = new Date();
+    return [...chapters]
+      .filter((c) => c.publicDate && new Date(c.publicDate) < now)
+      .sort(
+        (a, b) =>
+          new Date(b.publicDate!).getTime() - new Date(a.publicDate!).getTime()
+      )
+      .slice(0, 3);
+  };
+
   useEffect(() => {
     const getBook = async () => {
       const res = await getBookById(id);
@@ -47,6 +76,19 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
         setBook(res.data as unknown as Book);
         setAuthor(res.data?.author as unknown as UserType);
         setReviews(res.reviews as unknown as ReviewWithUserType[]);
+      }
+
+      const c = await getBookData(id);
+
+      if (c.success) {
+        setChapters(c.data?.chaps as unknown as ChapterType[]);
+        getVisits(c.data?.chaps as unknown as ChapterType[]);
+        setNextChapter(
+          getNextChapter(c.data?.chaps as unknown as ChapterType[])
+        );
+        setLatestChapters(
+          getLastChapters(c.data?.chaps as unknown as ChapterType[])
+        );
       }
     };
 
@@ -136,16 +178,42 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
         <div className="flex bg-slate-900 border border-slate-600 w-full rounded-xl p-4 shadow-md shadow-slate-600 text-md items-center gap-4">
           <Calendar />
           <p className="font-bold">
-            Next release: <span className="font-medium">10/12/2025</span>
+            Next release:{" "}
+            <span className="font-medium">
+              {nextChapter?.publicDate
+                ? new Intl.DateTimeFormat(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }).format(new Date(nextChapter.publicDate))
+                : "soon"}
+            </span>
           </p>
         </div>
-        <div className="mt-6">
-          <h2 className="text-xl md:text-2xl font-bold">Chapters</h2>
-          {chapters && chapters.length > 0 ? (
-            <div className="">
-              <Link href={""}></Link>
-              <Link href={""}></Link>
-              <Link href={""}></Link>
+        <div className="mt-8">
+          <Link href={`/books/${id}/chapters`} className="flex justify-between items-center">
+            <h2 className="text-xl md:text-2xl font-bold">Chapters</h2>
+            <ChevronRight />
+          </Link>
+          {latestChapters && latestChapters.length > 0 ? (
+            <div className="flex flex-col mt-3">
+              {latestChapters?.map((c) => (
+                <Link
+                  href={""}
+                  key={c.id}
+                  className="w-full p-3 hover:bg-slate-800 rounded-md"
+                >
+                  <p className="text-sm">{c.title}</p>
+                  <p className="text-xs">
+                    Last updated:{" "}
+                    {c?.lastUpdated
+                      ? new Intl.DateTimeFormat(undefined, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        }).format(new Date(c.lastUpdated))
+                      : "soon"}
+                  </p>
+                </Link>
+              ))}
             </div>
           ) : (
             <NothingHereYet className="h-40!" />

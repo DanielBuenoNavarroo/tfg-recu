@@ -21,7 +21,7 @@ const Header = ({ session }: { session: Session }) => {
               "text-base cursor-pointer capitalize text-slate-100 hover:text-slate-300"
             }
           >
-            Library
+            Browse
           </Link>
         </li>
         {session.user.role !== "DEFAULT" && (

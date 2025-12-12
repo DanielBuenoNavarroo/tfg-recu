@@ -347,9 +347,18 @@
     scrollbar-width: thin;
     scrollbar-color: #314158 transparent;
   }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #7e848b transparent;
+  }
 }
 
 *::-webkit-scrollbar {
+  width: 16px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
   width: 16px;
 }
 
@@ -358,4 +367,24 @@
   border: 5px solid transparent;
   background-clip: content-box;
   background-color: #314158;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 5px solid transparent;
+  background-clip: content-box;
+  background-color: #7e848b;
+}
+
+.font-inter {
+  font-family: var(--font-inter);
+}
+.font-merriweather {
+  font-family: var(--font-merriweather);
+}
+.font-crimson {
+  font-family: var(--font-crimson);
+}
+.font-ibm {
+  font-family: var(--font-ibmPlexSans);
 }

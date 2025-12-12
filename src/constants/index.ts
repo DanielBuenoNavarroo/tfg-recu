@@ -1,5 +1,20 @@
 import { Book, Bookmark, Home, User, Users } from "lucide-react";
 
+export const libraryLinks = [
+  {
+    href: "/my-library/recent",
+    label: "Recent",
+  },
+  {
+    href: "/my-library/bookmarked",
+    label: "Bookmarked",
+  },
+  {
+    href: "/my-library/reading-lists",
+    label: "Reading Lists",
+  },
+];
+
 export const sampleBooks = [
   {
     id: 1,

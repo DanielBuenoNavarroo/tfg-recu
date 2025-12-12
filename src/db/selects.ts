@@ -50,6 +50,7 @@ export const publicChapterFields = {
   publicDate: chapters.publicDate,
   order: chapters.order,
   title: chapters.title,
+  content: chapters.content,
   visits: chapters.visits,
   lastUpdated: chapters.lastUpdated,
   createdAt: chapters.createdAt,
@@ -114,6 +115,7 @@ export type ChapterType = {
   title: string | null;
   visits: number;
   publicDate?: Date;
+  content?: string;
   lastUpdated: Date;
   createdAt: Date;
 };
