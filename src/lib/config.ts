@@ -10,6 +10,11 @@ const config = {
       qstashCurrentSignInKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
       qstashNextSignInKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
     },
+    stripe: {
+      stripePublicKey: process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY!,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+    }
   },
 };
 

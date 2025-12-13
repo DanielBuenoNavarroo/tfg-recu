@@ -1,22 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { libraryLinks } from "@/constants";
-import Link from "next/link";
+import MyLibraryHeader from "@/components/my-library/MyLibraryHeader";
 import React from "react";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div>
+    <div className="max-w-5xl mx-auto">
       <div className="flex gap-4 w-full justify-center">
-        {libraryLinks.map((link) => (
-          <Button asChild key={link.label} variant={"ghost"}>
-            <Link href={link.href}>
-              <p className={"uppercase font-bold"}>{link.label}</p>
-            </Link>
-          </Button>
-        ))}
+        <MyLibraryHeader />
       </div>
+      <main>{children}</main>
     </div>
   );
 };
 
-export default layout;
+export default Layout;

@@ -61,10 +61,16 @@ const Page = () => {
         {ownBooks.map((book) => (
           <div key={book.id} className="mt-4">
             <Link href={`/created/${book.id}`}>
-              <BookCover coverColor={book.color} className="h-60!" />
+              <BookCover
+                coverColor={book.color}
+                coverUrl={book.cover !== "" ? book.cover : undefined}
+                className="h-60!"
+              />
             </Link>
             <div className="flex items-center justify-between mt-2">
-              <h2 className="text-xl font-semibold truncate max-w-[133px]">{book.title}</h2>
+              <h2 className="text-xl font-semibold truncate max-w-[133px]">
+                {book.title}
+              </h2>
               <BookActions book={book} setOwnBooks={setOwnBooks} />
             </div>
           </div>

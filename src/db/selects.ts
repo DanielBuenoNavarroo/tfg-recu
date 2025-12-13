@@ -1,5 +1,12 @@
 import { InferSelectModel } from "drizzle-orm";
-import { books, chapterGroups, chapters, reviews, users } from "./schema";
+import {
+  bookLists,
+  books,
+  chapterGroups,
+  chapters,
+  reviews,
+  users,
+} from "./schema";
 
 export const publicUserFields = {
   id: users.id,
@@ -21,6 +28,8 @@ export const publicBookFields = {
   title: books.title,
   status: books.status,
   isPublic: books.isPublic,
+  price: books.price,
+  currency: books.currency,
   createdAt: books.createdAt,
   lastUpdated: books.lastUpdated,
 };
@@ -56,6 +65,14 @@ export const publicChapterFields = {
   createdAt: chapters.createdAt,
 };
 
+export const publicReadingListFields = {
+  id: bookLists.id,
+  userId: bookLists.userId,
+  name: bookLists.name,
+  description: bookLists.description,
+  createdAt: bookLists.createdAt,
+};
+
 export type PublicUser = Pick<
   InferSelectModel<typeof users>,
   | "id"
@@ -77,6 +94,8 @@ export type PublicBook = Pick<
   | "genre"
   | "title"
   | "status"
+  | "currency"
+  | "price"
   | "isPublic"
   | "createdAt"
   | "lastUpdated"
@@ -119,3 +138,14 @@ export type ChapterType = {
   lastUpdated: Date;
   createdAt: Date;
 };
+
+export type ReadingListType = {
+  id: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  bookCount?: number;
+};
+
+export type PgError = { code?: string; message?: string };

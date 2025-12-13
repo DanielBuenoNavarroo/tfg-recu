@@ -1,5 +1,7 @@
 import { Book, Bookmark, Home, User, Users } from "lucide-react";
 
+export const RECENT_BOOKS_KEY = "recent-books";
+
 export const libraryLinks = [
   {
     href: "/my-library/recent",

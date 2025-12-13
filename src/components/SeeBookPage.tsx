@@ -3,7 +3,7 @@
 import BookCover from "@/components/BookCover";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChapterType, ReviewWithUserType } from "@/db/selects";
+import { ChapterType, ReadingListType, ReviewWithUserType } from "@/db/selects";
 import { useReviewVotes } from "@/hooks/useReviewVotes";
 import { getBookById } from "@/lib/actions/book";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,6 @@ import {
   Calendar,
   ChevronRight,
   Eye,
-  Plus,
   Star,
   ThumbsDown,
   ThumbsUp,
@@ -25,6 +24,15 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import NothingHereYet from "./NothingHereYet";
 import { getBookData } from "@/lib/actions/chapters";
+import { RECENT_BOOKS_KEY } from "@/constants";
+import BookListSelector from "./BookListSelector";
+import {
+  createBookListItem,
+  getReadingLists,
+} from "@/lib/actions/reading-lists";
+import { toast } from "sonner";
+import { PaymentDialog } from "./payment/PaymentDialog";
+import { hasUserPurchasedBook } from "@/lib/actions/purchases";
 
 const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   const [book, setBook] = useState<Book | null>(null);
@@ -33,6 +41,8 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   const [nextChapter, setNextChapter] = useState<ChapterType>();
   const [latestChapters, setLatestChapters] = useState<ChapterType[]>();
   const [chapters, setChapters] = useState<ChapterType[]>([]);
+  const [readingLists, setReadingLists] = useState<ReadingListType[]>([]);
+  const [purchased, setPurchased] = useState(false);
 
   const {
     reviews,
@@ -69,6 +79,41 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   };
 
   useEffect(() => {
+    if (!id) return;
+
+    try {
+      const stored = localStorage.getItem(RECENT_BOOKS_KEY);
+      const books: string[] = stored ? JSON.parse(stored) : [];
+
+      const filtered = books.filter((bookId) => bookId !== id);
+      filtered.push(id);
+
+      localStorage.setItem(RECENT_BOOKS_KEY, JSON.stringify(filtered));
+    } catch (error) {
+      console.error("Error saving book id:", error);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    const data = async () => {
+      console.log("first");
+      if (!book || !book.price) return;
+      if (book?.price && book.price <= 0) {
+        setPurchased(true);
+        return;
+      }
+
+      const res = await hasUserPurchasedBook(book.id);
+
+      if (res.success) {
+        setPurchased(res.data);
+      }
+    };
+
+    data();
+  }, [book]);
+
+  useEffect(() => {
     const getBook = async () => {
       const res = await getBookById(id);
 
@@ -90,10 +135,25 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
           getLastChapters(c.data?.chaps as unknown as ChapterType[])
         );
       }
+
+      const listsResponse = await getReadingLists();
+
+      if (listsResponse.success) {
+        setReadingLists(listsResponse.data);
+
+        console.log(listsResponse.data);
+      }
     };
 
     getBook();
   }, [id, setReviews]);
+
+  const onSelectList = async (listId: string) => {
+    const res = await createBookListItem({ bookId: id, listId });
+    if (res.success) {
+      toast.success("List updated correctly");
+    } else toast.error("Failed to update the list");
+  };
 
   if (!book) {
     return (
@@ -108,12 +168,20 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
       <div className="flex gap-4 justify-center">
         <div className="">
           <BookCover coverColor={book.color} />
-          <Button
-            className="w-full mt-2 bg-light-200"
-            disabled={chapters && chapters.length <= 0}
-          >
-            Start reading
-          </Button>
+          {purchased ? (
+            <Button
+              className="w-full mt-2 bg-light-200"
+              disabled={chapters && chapters.length <= 0}
+            >
+              Start reading
+            </Button>
+          ) : (
+            <PaymentDialog
+              amount={book.price}
+              bookId={id}
+              userId={session.user.id}
+            />
+          )}
           <div className="mt-2 flex">
             <Button
               variant={"ghost"}
@@ -121,12 +189,11 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
             >
               <Bookmark />
             </Button>
-            <Button
-              variant={"ghost"}
-              className="border-2 border-slate-400 w-1/2"
-            >
-              <Plus />
-            </Button>
+            <BookListSelector
+              bookId={id}
+              bookLists={readingLists}
+              onSelectList={onSelectList}
+            />
           </div>
           <Separator className="mt-4 bg-slate-400" />
           <div className="flex gap-3 items-center justify-center pt-4">
@@ -190,7 +257,10 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
           </p>
         </div>
         <div className="mt-8">
-          <Link href={`/books/${id}/chapters`} className="flex justify-between items-center">
+          <Link
+            href={`/books/${id}/chapters`}
+            className="flex justify-between items-center"
+          >
             <h2 className="text-xl md:text-2xl font-bold">Chapters</h2>
             <ChevronRight />
           </Link>

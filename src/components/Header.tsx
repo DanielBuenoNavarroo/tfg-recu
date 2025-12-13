@@ -24,6 +24,16 @@ const Header = ({ session }: { session: Session }) => {
             Browse
           </Link>
         </li>
+        <li>
+          <Link
+            href={"/my-library/recent"}
+            className={
+              "text-base cursor-pointer capitalize text-slate-100 hover:text-slate-300"
+            }
+          >
+            Library
+          </Link>
+        </li>
         {session.user.role !== "DEFAULT" && (
           <li>
             <Link

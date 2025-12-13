@@ -16,7 +16,7 @@ interface Props {
   className?: string;
   variant?: BookCoverVariant;
   coverColor?: string;
-  coverUrl?: string;
+  coverUrl?: string | null;
 }
 
 const BookCover = ({
@@ -39,7 +39,7 @@ const BookCover = ({
         style={{ left: "12%", width: "87.5%", height: "88%" }}
       >
         <Image
-          src={coverUrl}
+          src={coverUrl!}
           alt="Book cover"
           fill
           className="rounded-sm object-fill"

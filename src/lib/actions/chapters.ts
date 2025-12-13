@@ -252,6 +252,8 @@ export const deleteChapterGroup = async (id: string) => {
       throw new Error("Not authenticated");
     }
 
+    await db.delete(chapters).where(eq(chapters.groupId, id));
+
     const deletedGroup = await db
       .delete(chapterGroups)
       .where(eq(chapterGroups.id, id))

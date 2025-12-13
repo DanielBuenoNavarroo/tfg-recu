@@ -88,8 +88,23 @@ export const books = pgTable("books", {
   status: BOOK_STATUS_ENUM("status").default("Ongoing"),
   isPublic: boolean("is_public").notNull().default(false),
   coverColor: varchar("cover_color", { length: 7 }).default("#314158"),
+  price: numeric("price", { precision: 10, scale: 2 }).default(sql`0`), 
+  currency: varchar("currency", { length: 3 }).default("EUR"),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const purchases = pgTable("purchases", {
+  id: uuid("id").notNull().primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  bookId: uuid("book_id")
+    .notNull()
+    .references(() => books.id, { onDelete: "cascade" }),
+  amountPaid: numeric("amount_paid", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("EUR"),
+  purchasedAt: timestamp("purchased_at", { withTimezone: true }).defaultNow(),
 });
 
 export const reviews = pgTable(
@@ -165,6 +180,49 @@ export const chapters = pgTable("chapters", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const bookLists = pgTable("book_lists", {
+  id: uuid("id").notNull().primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const bookListItems = pgTable(
+  "book_list_items",
+  {
+    id: uuid("id").notNull().primaryKey().defaultRandom(),
+    listId: uuid("list_id")
+      .notNull()
+      .references(() => bookLists.id, { onDelete: "cascade" }),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    addedAt: timestamp("added_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    uniqueBookInList: uniqueIndex("unique_book_in_list").on(
+      table.listId,
+      table.bookId
+    ),
+  })
+);
+
+export const bookmarks = pgTable("bookmarks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  bookId: uuid("book_id")
+    .notNull()
+    .references(() => books.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  uniqueBookmark: uniqueIndex("unique_bookmark").on(table.userId, table.bookId),
+}));
+
 export const comments = pgTable(
   "comments",
   {
@@ -232,5 +290,24 @@ export const chaptersRelations = relations(chapters, ({ one }) => ({
   group: one(chapterGroups, {
     fields: [chapters.groupId],
     references: [chapterGroups.id],
+  }),
+}));
+
+export const bookListsRelations = relations(bookLists, ({ one, many }) => ({
+  user: one(users, {
+    fields: [bookLists.userId],
+    references: [users.id],
+  }),
+  items: many(bookListItems),
+}));
+
+export const bookListItemsRelations = relations(bookListItems, ({ one }) => ({
+  list: one(bookLists, {
+    fields: [bookListItems.listId],
+    references: [bookLists.id],
+  }),
+  book: one(books, {
+    fields: [bookListItems.bookId],
+    references: [books.id],
   }),
 }));

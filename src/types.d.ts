@@ -15,6 +15,8 @@ interface Book {
   cover: string;
   status: (typeof BOOK_STATUS_ENUM.enumValues)[number];
   isPublic: boolean;
+  price: number;
+  currency: string;
   lastUpdated: Date;
   createdAt: Date;
 }

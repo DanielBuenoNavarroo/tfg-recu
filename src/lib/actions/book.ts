@@ -9,7 +9,7 @@ import {
   publicUserFields,
 } from "@/db/selects";
 import { BookParams } from "@/types";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 export const createBook = async ({
   title,
@@ -198,6 +198,36 @@ export const getBookById = async (id: string) => {
     return {
       succes: false,
       message: "An error occurred while fetching the book",
+    };
+  }
+};
+
+export const getBooksByIds = async (ids: string[]) => {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    if (ids.length <= 0) {
+      throw new Error("No data parsed");
+    }
+
+    const result = await db
+      .select(publicBookFields)
+      .from(books)
+      .where(inArray(books.id, ids));
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      message: "An error occurred while fetching the books",
     };
   }
 };
