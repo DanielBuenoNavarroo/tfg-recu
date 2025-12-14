@@ -41,7 +41,7 @@ const Page = () => {
       books &&
       books.length > 0 &&
       recentBooksIDs.length > 0 ? (
-        <div className="mt-8">
+        <div className="mt-8 space-y-2">
           {books.map((b) => (
             <div
               className="hover:opacity-70 transition-all duration-300 flex items-center justify-between"
@@ -55,11 +55,11 @@ const Page = () => {
                   <BookCover
                     coverUrl={b.cover !== "" ? b.cover : undefined}
                     coverColor={b.color}
-                    className="w-26! min-w-10! h-34!"
+                    className="w-26! min-w-26! h-34!"
                   />
                   <div className="">
-                    <p className="font-bold text-xl">{b.title}</p>
-                    <p className="text-slate-300">{b.description}</p>
+                    <p className="font-bold text-xl truncate-1-lines">{b.title}</p>
+                    <p className="text-slate-300 truncate-4-lines">{b.description}</p>
                   </div>
                 </div>
               </Link>

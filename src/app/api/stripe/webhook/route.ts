@@ -1,18 +1,15 @@
 import Stripe from "stripe";
-import { NextRequest, NextResponse } from "next/server";
-import { purchases } from "@/db/schema";
-import config from "@/lib/config";
+import { purchases, books, authorsBalance } from "@/db/schema";
 import { db } from "@/db/drizzle";
+import { and, eq, sql } from "drizzle-orm";
 
-const stripe = new Stripe(config.env.stripe.stripeSecretKey);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-11-17.clover",
+});
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature")!;
   const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
-
-  if (!sig) {
-    return new NextResponse("Missing signature", { status: 400 });
-  }
 
   let event: Stripe.Event;
 
@@ -20,10 +17,10 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       sig,
-      config.env.stripe.webhookSecret
+      process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err) {
-    return new NextResponse("Invalid signature", { status: 400 });
+  } catch (err: any) {
+    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
   if (event.type === "payment_intent.succeeded") {
@@ -31,18 +28,56 @@ export async function POST(req: NextRequest) {
 
     const userId = intent.metadata.userId;
     const bookId = intent.metadata.bookId;
+    const amountPaid = intent.amount_received / 100;
+    const currency = intent.currency.toUpperCase() as "EUR";
 
-    if (!userId || !bookId) {
-      return new NextResponse("Missing metadata", { status: 400 });
+    try {
+      await db.insert(purchases).values({
+        userId,
+        bookId,
+        amountPaid: amountPaid.toString(),
+        currency,
+      });
+
+      const [book] = await db
+        .select({ authorId: books.authorId })
+        .from(books)
+        .where(eq(books.id, bookId));
+
+      if (!book) throw new Error("Book not found");
+
+      const [wallet] = await db
+        .select()
+        .from(authorsBalance)
+        .where(
+          and(
+            eq(authorsBalance.authorId, book.authorId),
+            eq(authorsBalance.currency, currency)
+          )
+        );
+
+      if (wallet) {
+        await db
+          .update(authorsBalance)
+          .set({
+            balance: sql`${authorsBalance.balance} + ${amountPaid}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(authorsBalance.id, wallet.id));
+      } else {
+        await db.insert(authorsBalance).values({
+          authorId: book.authorId,
+          balance: amountPaid.toString(),
+          currency,
+        });
+      }
+
+      console.log("✅ Payment processed successfully");
+      return new Response("ok", { status: 200 });
+    } catch (err: any) {
+      return new Response(`Error: ${err.message}`, { status: 500 });
     }
-
-    await db.insert(purchases).values({
-      userId: userId,
-      bookId: bookId,
-      amountPaid: (intent.amount_received / 100).toString(),
-      currency: intent.currency.toUpperCase(),
-    });
   }
 
-  return NextResponse.json({ received: true });
+  return new Response("ok", { status: 200 });
 }

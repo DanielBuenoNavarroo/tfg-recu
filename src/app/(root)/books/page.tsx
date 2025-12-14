@@ -50,7 +50,7 @@ const Page = () => {
       </div>
       <Separator />
       {books.length > 0 ? (
-        <div className="mt-4">
+        <div className="mt-4 space-y-4">
           {books.map((book) => (
             <Link
               href={`/books/${book.id}`}
@@ -58,13 +58,23 @@ const Page = () => {
               className="flex items-center justify-between"
             >
               <div className="flex gap-4">
-                <BookCover className="min-w-16! w-30 h-40" />
-                <div className="">
-                  <h2 className="font-bold text-2xl">{book.title}</h2>
-                  <p className="text-slate-300">{book.description}</p>
+                <BookCover
+                  className="min-w-30! w-30 h-40"
+                  coverColor={book.color}
+                  coverUrl={book.cover.trim() !== "" ? book.cover : undefined}
+                />
+                <div className="flex flex-col">
+                  <h2 className="font-bold text-2xl truncate-1-lines">
+                    {book.title}
+                  </h2>
+                  <p className="max-w-[500px] text-slate-300 truncate-4-lines line-clamp-4 w-fit overflow-x-hidden">
+                    {book.description.replace(/\s+/g, " ").trim()}
+                  </p>
                 </div>
               </div>
-              <ChevronRight />
+              <div className="">
+                <ChevronRight />
+              </div>
             </Link>
           ))}
         </div>

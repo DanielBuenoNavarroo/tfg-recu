@@ -32,7 +32,7 @@ export const PaymentDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full mt-2 bg-light-200">
+        <Button className="w-full mt-2 bg-light-200 font-bold">
           Buy for {amount}€
         </Button>
       </DialogTrigger>

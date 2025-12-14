@@ -60,6 +60,8 @@ export const BOOK_STATUS_ENUM = pgEnum("book_status", [
   "Droped",
 ]);
 
+export type GENRE_ENUM_TYPE = typeof GENRE_ENUM.enumValues
+
 export const users = pgTable("users", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
   fullName: varchar("full_name", { length: 255 }).notNull(),
@@ -88,7 +90,7 @@ export const books = pgTable("books", {
   status: BOOK_STATUS_ENUM("status").default("Ongoing"),
   isPublic: boolean("is_public").notNull().default(false),
   coverColor: varchar("cover_color", { length: 7 }).default("#314158"),
-  price: numeric("price", { precision: 10, scale: 2 }).default(sql`0`), 
+  price: numeric("price", { precision: 10, scale: 2 }).default(sql`0`),
   currency: varchar("currency", { length: 3 }).default("EUR"),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -105,6 +107,29 @@ export const purchases = pgTable("purchases", {
   amountPaid: numeric("amount_paid", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("EUR"),
   purchasedAt: timestamp("purchased_at", { withTimezone: true }).defaultNow(),
+});
+
+export const authorsBalance = pgTable("authors_balance", {
+  id: uuid("id").notNull().primaryKey().defaultRandom(),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  balance: numeric("balance", { precision: 10, scale: 2 }).notNull().default("0"),
+  currency: varchar("currency", { length: 3 }).notNull().default("EUR"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  uniq: uniqueIndex("authors_balance_author_currency_idx").on(table.authorId, table.currency),
+}));
+
+export const withdrawals = pgTable("withdrawals", {
+  id: uuid("id").notNull().primaryKey().defaultRandom(),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("EUR"),
+  requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow(),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
 });
 
 export const reviews = pgTable(
@@ -210,18 +235,25 @@ export const bookListItems = pgTable(
   })
 );
 
-export const bookmarks = pgTable("bookmarks", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  bookId: uuid("book_id")
-    .notNull()
-    .references(() => books.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-}, (table) => ({
-  uniqueBookmark: uniqueIndex("unique_bookmark").on(table.userId, table.bookId),
-}));
+export const bookmarks = pgTable(
+  "bookmarks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    bookId: uuid("book_id")
+      .notNull()
+      .references(() => books.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    uniqueBookmark: uniqueIndex("unique_bookmark").on(
+      table.userId,
+      table.bookId
+    ),
+  })
+);
 
 export const comments = pgTable(
   "comments",

@@ -11,7 +11,9 @@
     "db:push": "npx drizzle-kit push",
     "db:migrate": "npx drizzle-kit migrate",
     "db:studio": "npx drizzle-kit studio",
-    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
+    "db:seed": "npx tsx src/db/seed.ts",
+    "db:seedchaps": "npx tsx src/db/seed-chapters.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

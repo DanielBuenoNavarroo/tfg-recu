@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import BookCoverSvg from "./BookCoverSvg";
+import { URL_ADMITED } from "@/constants";
 
 type BookCoverVariant = "extraSmall" | "small" | "medium" | "regular" | "wide";
 
@@ -25,6 +26,16 @@ const BookCover = ({
   coverColor = "#012B48",
   coverUrl = "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
 }: Props) => {
+  const isAdmitted = (() => {
+    if (!coverUrl) return false;
+    try {
+      const { hostname } = new URL(coverUrl);
+      return URL_ADMITED.includes(hostname);
+    } catch {
+      return false;
+    }
+  })();
+
   return (
     <div
       className={cn(
@@ -33,17 +44,26 @@ const BookCover = ({
         className
       )}
     >
-      <BookCoverSvg  coverColor={coverColor}/>
+      <BookCoverSvg coverColor={coverColor} />
       <div
         className="absolute z-10"
         style={{ left: "12%", width: "87.5%", height: "88%" }}
       >
-        <Image
-          src={coverUrl!}
-          alt="Book cover"
-          fill
-          className="rounded-sm object-fill"
-        />
+        {isAdmitted ? (
+          <Image
+            src={coverUrl!}
+            alt="Book cover"
+            fill
+            className="rounded-sm object-fill"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={coverUrl!}
+            alt="Book cover"
+            className="w-full h-full rounded-sm object-fill"
+          />
+        )}
       </div>
     </div>
   );

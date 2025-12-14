@@ -6,12 +6,21 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import Link from "next/link";
 import { Session } from "next-auth";
+import Image from "next/image";
 
 const Header = ({ session }: { session: Session }) => {
   return (
     <header className="my-10 flex justify-between gap-5">
-      <Link href={"/"} className="flex justify-center items-center gap-2">
-        <BookOpen width={40} height={40} />
+      <Link
+        href={"/"}
+        className="flex justify-center items-center gap-2 border-b-2 border-slate-400"
+      >
+        <Image
+          src={"/images/studio-logo.webp"}
+          alt="Logo"
+          width={50}
+          height={50}
+        />
       </Link>
       <ul className="flex flex-row items-center gap-8">
         <li>

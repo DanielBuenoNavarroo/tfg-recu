@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RECENT_BOOKS_KEY } from "@/constants";
 import { cn } from "@/lib/utils";
 import { Ellipsis, TrashIcon } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
@@ -20,14 +21,16 @@ interface Props {
 }
 
 const RecentBooksActions = ({ id, setRecentBooksIDs }: Props) => {
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
-      const stored = localStorage.getItem("recent_books");
+      const stored = localStorage.getItem(RECENT_BOOKS_KEY);
       const books: string[] = stored ? JSON.parse(stored) : [];
 
       const updated = books.filter((bookId) => bookId !== id);
 
-      localStorage.setItem("recent_books", JSON.stringify(updated));
+      localStorage.setItem(RECENT_BOOKS_KEY, JSON.stringify(updated));
 
       setRecentBooksIDs(updated);
     } catch (err) {

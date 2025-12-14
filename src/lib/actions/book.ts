@@ -2,14 +2,14 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { books, reviews, reviewVotes, users } from "@/db/schema";
+import { books, chapters, reviews, reviewVotes, users } from "@/db/schema";
 import {
   publicBookFields,
   publicReviewsFields,
   publicUserFields,
 } from "@/db/selects";
 import { BookParams } from "@/types";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 export const createBook = async ({
   title,
@@ -251,6 +251,43 @@ export const getBookByGenre = async (genres: string[]) => {
     return {
       success: false,
       error: "Error fetching books by genre",
+    };
+  }
+};
+
+export const getMostViewedBooks = async (limit: number = 10) => {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const result = await db
+      .select({
+        ...publicBookFields,
+        author: {
+          ...publicUserFields,
+        },
+        totalViews: sql<number>`SUM(${chapters.visits})`,
+      })
+      .from(books)
+      .leftJoin(chapters, eq(chapters.bookId, books.id))
+      .innerJoin(users, eq(users.id, books.authorId))
+      .where(eq(chapters.isPublic, true))
+      .groupBy(books.id, users.id)
+      .orderBy(desc(sql`COALESCE(SUM(${chapters.visits}), 0)`))
+      .limit(limit);
+
+    return {
+      succes: true,
+      data: result,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      succes: false,
+      message: "An error occurred while fetching most viewed books",
     };
   }
 };

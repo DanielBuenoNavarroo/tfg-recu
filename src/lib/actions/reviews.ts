@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
 import { reviews, reviewVotes } from "@/db/schema";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 
 type VoteInput = {
   reviewId: string;
@@ -127,3 +127,33 @@ export async function deleteReview(reviewId: string) {
     return { success: false, error: "Error al eliminar la reseña" };
   }
 }
+
+export const getReviewsAverage = async (bookId: string) => {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const result = await db
+      .select({
+        bookId: reviews.bookId,
+        averageRating: sql<number>`ROUND(AVG(${reviews.rating})::numeric, 2)`,
+        totalReviews: sql<number>`COUNT(${reviews.id})`,
+      })
+      .from(reviews)
+      .where(eq(reviews.bookId, bookId))
+      .groupBy(reviews.bookId);
+
+    return {
+      succes: true,
+      data: result[0] ?? { bookId, averageRating: 0, totalReviews: 0 },
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      succes: false,
+      message: "An error occurred while fetching reviews average",
+    };
+  }
+};

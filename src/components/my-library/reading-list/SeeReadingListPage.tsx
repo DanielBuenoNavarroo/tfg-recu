@@ -125,15 +125,17 @@ const SeeReadingListPage = ({ id }: Props) => {
               href={`/books/${b.id}`}
               className="relative border w-full rounded-md p-4 flex items-center bg-slate-950/40"
             >
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-4">
                 <BookCover
                   coverUrl={b.cover !== "" ? b.cover : undefined}
                   coverColor={b.color}
-                  className="w-26! min-w-10! h-34!"
+                  className="w-26! min-w-26! h-34!"
                 />
                 <div className="">
-                  <p className="text-xl font-bold">{b.title}</p>
-                  <div className="flex gap-4 mt-4">
+                  <p className="text-xl font-bold truncate-1-lines">
+                    {b.title}
+                  </p>
+                  <div className="flex gap-4 mt-2">
                     {b.genre.length > 0 &&
                       b.genre.map((g) => (
                         <p

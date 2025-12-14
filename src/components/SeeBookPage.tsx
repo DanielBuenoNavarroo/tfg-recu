@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Book, User as UserType } from "@/types";
 import {
   Bookmark,
+  BookmarkCheck,
   Calendar,
   ChevronRight,
   Eye,
@@ -33,6 +34,11 @@ import {
 import { toast } from "sonner";
 import { PaymentDialog } from "./payment/PaymentDialog";
 import { hasUserPurchasedBook } from "@/lib/actions/purchases";
+import {
+  addBookmark,
+  isBookBookmarked,
+  removeBookmark,
+} from "@/lib/actions/bookmarks";
 
 const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   const [book, setBook] = useState<Book | null>(null);
@@ -43,6 +49,7 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
   const [chapters, setChapters] = useState<ChapterType[]>([]);
   const [readingLists, setReadingLists] = useState<ReadingListType[]>([]);
   const [purchased, setPurchased] = useState(false);
+  const [bookMarked, setBookMarked] = useState(false);
 
   const {
     reviews,
@@ -96,7 +103,6 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
 
   useEffect(() => {
     const data = async () => {
-      console.log("first");
       if (!book || !book.price) return;
       if (book?.price && book.price <= 0) {
         setPurchased(true);
@@ -110,7 +116,16 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
       }
     };
 
+    const getBookMark = async () => {
+      if (!book) return;
+
+      const res = await isBookBookmarked(book.id);
+
+      setBookMarked(res);
+    };
+
     data();
+    getBookMark();
   }, [book]);
 
   useEffect(() => {
@@ -140,8 +155,6 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
 
       if (listsResponse.success) {
         setReadingLists(listsResponse.data);
-
-        console.log(listsResponse.data);
       }
     };
 
@@ -153,6 +166,27 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
     if (res.success) {
       toast.success("List updated correctly");
     } else toast.error("Failed to update the list");
+  };
+
+  const handleBookMark = async () => {
+    if (!book) return;
+    if (bookMarked) {
+      const res = await removeBookmark(book.id);
+      if (res.success) {
+        toast.success("Bookmark removed");
+        setBookMarked(false);
+      } else {
+        toast.error("Failed to remove bookmark");
+      }
+    } else {
+      const res = await addBookmark(book.id);
+      if (res.success) {
+        toast.success("Bookmark added");
+        setBookMarked(true);
+      } else {
+        toast.error("Failed to add bookmark");
+      }
+    }
   };
 
   if (!book) {
@@ -167,7 +201,10 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
     <>
       <div className="flex gap-4 justify-center">
         <div className="">
-          <BookCover coverColor={book.color} />
+          <BookCover
+            coverColor={book.color}
+            coverUrl={book.cover.trim() !== "" ? book.cover : undefined}
+          />
           {purchased ? (
             <Button
               className="w-full mt-2 bg-light-200"
@@ -186,8 +223,9 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
             <Button
               variant={"ghost"}
               className="border-2 border-slate-400 w-1/2"
+              onClick={handleBookMark}
             >
-              <Bookmark />
+              {bookMarked ? <BookmarkCheck /> : <Bookmark />}
             </Button>
             <BookListSelector
               bookId={id}
