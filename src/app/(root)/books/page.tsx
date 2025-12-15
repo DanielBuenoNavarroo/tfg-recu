@@ -57,22 +57,22 @@ const Page = () => {
               key={book.id}
               className="flex items-center justify-between"
             >
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full">
                 <BookCover
                   className="min-w-30! w-30 h-40"
                   coverColor={book.color}
                   coverUrl={book.cover.trim() !== "" ? book.cover : undefined}
                 />
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full">
                   <h2 className="font-bold text-2xl truncate-1-lines">
                     {book.title}
                   </h2>
-                  <p className="max-w-[500px] text-slate-300 truncate-4-lines line-clamp-4 w-fit overflow-x-hidden">
+                  <p className="prose text-slate-300 truncate-4-lines line-clamp-4 w-fit overflow-x-hidden">
                     {book.description.replace(/\s+/g, " ").trim()}
                   </p>
                 </div>
               </div>
-              <div className="">
+              <div className="w-fit">
                 <ChevronRight />
               </div>
             </Link>

@@ -368,3 +368,7 @@ export async function getChapterById(chapterId: string) {
     };
   }
 }
+
+export async function deleteAllChapters() {
+  await db.delete(chapters);
+}

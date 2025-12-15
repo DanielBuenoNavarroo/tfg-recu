@@ -9,7 +9,7 @@ import {
   publicUserFields,
 } from "@/db/selects";
 import { BookParams } from "@/types";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
 
 export const createBook = async ({
   title,
@@ -288,6 +288,50 @@ export const getMostViewedBooks = async (limit: number = 10) => {
     return {
       succes: false,
       message: "An error occurred while fetching most viewed books",
+    };
+  }
+};
+
+export const getSimilarBooks = async (bookId: string) => {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Not authenticated");
+
+    const [currentBook] = await db
+      .select(publicBookFields)
+      .from(books)
+      .where(eq(books.id, bookId));
+    if (!currentBook) throw new Error("Book not found");
+
+    const currentGenresArray = sql`
+      ARRAY[
+        ${sql.join(
+          (currentBook.genre ?? []).map((g: string) => sql`${g}::genre`),
+          sql`, `
+        )}
+      ]::genre[]
+    `;
+
+    const result = await db
+      .select(publicBookFields)
+      .from(books)
+      .where(
+        and(
+          ne(books.id, bookId),
+          sql`${books.genre} && ${currentGenresArray}`,
+          eq(books.isPublic, true)
+        )
+      );
+
+    return {
+      succes: true,
+      data: result,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      succes: false,
+      message: "An error occurred while fetching similar books",
     };
   }
 };

@@ -17,10 +17,10 @@ const BookCard = ({ id, title, genre, color, cover }: Book) => {
           <p className="mt-2 line-clamp-1 text-base font-semibold xs:text-xl">
             {title}
           </p>
-          <div className="">
-            <p className="mt-1 line-clamp-1 text-sm italic text-gray-400 xs:text-base">
-              {genre}
-            </p>
+          <div className="flex overflow-hidden gap-2 line-clamp-1">
+            {genre && genre.map((g) => (
+              <p className="text-xs line-clamp-1" key={g}>{g}</p>
+            ))}
           </div>
         </div>
       </Link>

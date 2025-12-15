@@ -20,7 +20,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           <div>{children}</div>
         </div>
       </section>
-      <section className="sticky h-40 w-full hidden sm:block sm:top-0 sm:h-screen sm:flex-1">
+      <section className="sticky h-40 w-full hidden md:block sm:top-0 sm:h-screen sm:flex-1">
         <Image
           src={"/images/pattern.webp"}
           alt="Auth img"

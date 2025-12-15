@@ -4,6 +4,7 @@ import {
   books,
   chapterGroups,
   chapters,
+  comments,
   reviews,
   users,
 } from "./schema";
@@ -71,6 +72,15 @@ export const publicReadingListFields = {
   name: bookLists.name,
   description: bookLists.description,
   createdAt: bookLists.createdAt,
+};
+
+export const publicCommentFields = {
+  id: comments.id,
+  content: comments.content,
+  parentCommentId: comments.parentCommentId,
+  createdAt: comments.createdAt,
+  userId: comments.userId,
+  userName: users.fullName,
 };
 
 export type PublicUser = Pick<

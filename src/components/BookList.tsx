@@ -1,11 +1,19 @@
 import { Book, User } from "@/types";
 import BookCard from "./BookCard";
-import Link from "next/link";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel";
 
-type BookWithViews = Book & {
-  totalViews: number;
-  author: User;
-};
+type BookWithViews =
+  | (Book & {
+      totalViews: number;
+      author: User;
+    })
+  | Book;
 
 interface Props {
   title: string;
@@ -16,14 +24,20 @@ interface Props {
 const BookList = ({ title, books, containerClassName }: Props) => {
   return (
     <section className={containerClassName}>
-      <Link href={""}>
-      </Link>
-      <h2 className="text-4xl">{title}</h2>
-      <ul className="mt-10 flex flex-wrap gap-5 max-xs:justify-between justify-center xs:gap-10">
-        {books.map((book) => (
-          <BookCard key={book.id} {...book} />
-        ))}
-      </ul>
+      <h2 className="text-4xl mb-6">{title}</h2>
+
+      <Carousel className="w-full list-none select-none">
+        <CarouselContent className="flex gap-6">
+          {books.map((book) => (
+            <CarouselItem key={book.id} className="shrink-0 basis-44">
+              <BookCard {...book} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+
+        <CarouselPrevious className="left-0 bg-slate-900!" />
+        <CarouselNext className="right-0 bg-slate-900!" />
+      </Carousel>
     </section>
   );
 };

@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import BottomBar from "./BottomBar";
 import Link from "@tiptap/extension-link";
 import { ChapterType } from "@/db/selects";
-import { getChapterById } from "@/lib/actions/chapters";
+import { getChapterById, updateChapter } from "@/lib/actions/chapters";
+import { toast } from "sonner";
 
 interface Props {
   chapterId: string;
@@ -40,6 +41,10 @@ const TipTap = ({ chapterId }: Props) => {
 
     getData();
   }, [chapterId]);
+
+  useEffect(() => {
+    console.log("Chapter: ", chapter);
+  }, [chapter]);
 
   const editor = useEditor({
     extensions: [
@@ -119,7 +124,7 @@ const TipTap = ({ chapterId }: Props) => {
       }),
       Image,
     ],
-    content: "<p>Start writing something here...</p>",
+    content: "<p>Empieza a escribir tu capítulo...</p>",
     immediatelyRender: false,
     editorProps: {
       attributes: {
@@ -133,6 +138,17 @@ const TipTap = ({ chapterId }: Props) => {
       setWordCount(words);
     },
   });
+
+  useEffect(() => {
+    if (editor && chapter?.content) {
+      try {
+        const parsed = JSON.parse(chapter.content);
+        editor.commands.setContent(parsed);
+      } catch (err) {
+        console.error("Error parsing chapter content:", err);
+      }
+    }
+  }, [editor, chapter]);
 
   const editorState = useEditorState({
     editor,
@@ -191,9 +207,19 @@ const TipTap = ({ chapterId }: Props) => {
         editor?.chain().focus().setLink({ href: url }).run();
       }
     },
-    saveContent: () => {
-      const content = editor?.getJSON();
-      console.log(content);
+    saveContent: async () => {
+      if (!editor || !chapter) return;
+
+      const contentJSON = editor.getJSON();
+      const res = await updateChapter(chapter.id, {
+        content: JSON.stringify(contentJSON),
+      });
+
+      if (res.success) {
+        toast.success("Content saved correctly");
+      } else {
+        toast.error("Failed to save content");
+      }
     },
   };
 

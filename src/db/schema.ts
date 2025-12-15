@@ -60,7 +60,7 @@ export const BOOK_STATUS_ENUM = pgEnum("book_status", [
   "Droped",
 ]);
 
-export type GENRE_ENUM_TYPE = typeof GENRE_ENUM.enumValues
+export type GENRE_ENUM_TYPE = typeof GENRE_ENUM.enumValues;
 
 export const users = pgTable("users", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
@@ -109,17 +109,26 @@ export const purchases = pgTable("purchases", {
   purchasedAt: timestamp("purchased_at", { withTimezone: true }).defaultNow(),
 });
 
-export const authorsBalance = pgTable("authors_balance", {
-  id: uuid("id").notNull().primaryKey().defaultRandom(),
-  authorId: uuid("author_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  balance: numeric("balance", { precision: 10, scale: 2 }).notNull().default("0"),
-  currency: varchar("currency", { length: 3 }).notNull().default("EUR"),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-}, (table) => ({
-  uniq: uniqueIndex("authors_balance_author_currency_idx").on(table.authorId, table.currency),
-}));
+export const authorsBalance = pgTable(
+  "authors_balance",
+  {
+    id: uuid("id").notNull().primaryKey().defaultRandom(),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    balance: numeric("balance", { precision: 10, scale: 2 })
+      .notNull()
+      .default("0"),
+    currency: varchar("currency", { length: 3 }).notNull().default("EUR"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => ({
+    uniq: uniqueIndex("authors_balance_author_currency_idx").on(
+      table.authorId,
+      table.currency
+    ),
+  })
+);
 
 export const withdrawals = pgTable("withdrawals", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
@@ -272,9 +281,7 @@ export const comments = pgTable(
       onDelete: "cascade",
     }),
 
-    parentCommentId: uuid("parent_comment_id").references(() => comments.id, {
-      onDelete: "cascade",
-    }),
+    parentCommentId: uuid("parent_comment_id"),
 
     content: text("content").notNull(),
 
@@ -289,10 +296,11 @@ export const comments = pgTable(
         (book_id IS NULL AND chapter_id IS NOT NULL)
       )`
     ),
+
     parentFk: foreignKey({
       columns: [table.parentCommentId],
       foreignColumns: [table.id],
-    }),
+    }).onDelete("cascade"),
   })
 );
 

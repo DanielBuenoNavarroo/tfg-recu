@@ -44,3 +44,16 @@ interface BookParams {
   coverImage?: string;
   coverColor: string;
 }
+
+export type CommentDto = {
+  id: string;
+  content: string;
+  parentCommentId: string | null;
+  createdAt: string;
+  userId: string;
+  userName: string | null;
+};
+
+export type CommentNode = CommentDto & {
+  childComments: CommentNode[];
+};

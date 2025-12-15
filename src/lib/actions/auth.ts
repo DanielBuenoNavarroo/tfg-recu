@@ -4,7 +4,7 @@ import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
 import { hash } from "bcryptjs";
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ratelimit from "../ratelimit";
@@ -73,6 +73,10 @@ export const signUp = async ({
     console.log(e);
     return { success: false, error: "SignUp error" };
   }
+};
+
+export const signOutWithRedirect = async () => {
+  await signOut({ redirectTo: "/sign-in" });
 };
 
 export const UserStatus = async () => {

@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import ReadPage from "@/components/read/ReadPage";
 
 const page = async ({
@@ -6,7 +7,9 @@ const page = async ({
   params: Promise<{ id: string; chapterId: string }>;
 }) => {
   const { chapterId, id } = await params;
-  return <ReadPage bookId={id} chapterId={chapterId} />;
+  const session = await auth();
+  if (!session) return;
+  return <ReadPage bookId={id} chapterId={chapterId} session={session} />;
 };
 
 export default page;

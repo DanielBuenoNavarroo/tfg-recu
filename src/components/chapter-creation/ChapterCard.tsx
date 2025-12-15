@@ -101,9 +101,9 @@ const ChapterCard = ({ chapter, deleteC, updateC }: Props) => {
         className={cn(
           chapter.isPublic
             ? new Date(chapter.publicDate ?? "") > new Date()
-              ? "text-yellow-400" // pending
-              : "text-green-500" // published
-            : "text-red-400", // private
+              ? "text-yellow-400"
+              : "text-green-500"
+            : "text-red-400",
           "border rounded-sm p-2 text-xs ml-2"
         )}
       >
@@ -151,7 +151,11 @@ const ChapterCard = ({ chapter, deleteC, updateC }: Props) => {
       </div>
       <ChapterActions chapter={chapter} deleteC={deleteC} updateC={updateC} />
       <Button variant={"ghost"} size={"icon-sm"} className="ml-2" asChild>
-        <Link href={`/created/${chapter.bookId}/edit/${chapter.id}`}>
+        <Link
+          href={`/created/${chapter.bookId}/edit/${chapter.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <ChevronRight />
         </Link>
       </Button>

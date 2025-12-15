@@ -34,6 +34,8 @@ export default function Home() {
     return <>Failed to fetch the books</>;
   }
 
+  if (!trending || trending.length <= 0) return;
+
   return (
     <>
       {trending && !error && (
