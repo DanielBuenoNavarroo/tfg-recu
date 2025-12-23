@@ -9,7 +9,7 @@ import {
   publicUserFields,
 } from "@/db/selects";
 import { BookParams } from "@/types";
-import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 
 export const createBook = async ({
   title,
@@ -61,7 +61,8 @@ export const updateBook = async ({
   genre,
   coverColor,
   coverImage,
-}: BookParams & { id: string }) => {
+  price,
+}: BookParams & { id: string; price: number }) => {
   try {
     const session = await auth();
 
@@ -78,6 +79,7 @@ export const updateBook = async ({
         coverColor,
         coverImage,
         authorId: session.user.id,
+        price: price.toString(),
       })
       .where(eq(books.id, id))
       .returning();
@@ -198,6 +200,44 @@ export const getBookById = async (id: string) => {
     return {
       succes: false,
       message: "An error occurred while fetching the book",
+    };
+  }
+};
+
+export const searchBooks = async (query: string) => {
+  const limit = 5;
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    if (!query || query.trim().length === 0) {
+      throw new Error("Empty search query");
+    }
+
+    const result = await db
+      .select(publicBookFields)
+      .from(books)
+      .where(
+        or(
+          ilike(books.title, `%${query}%`),
+          ilike(books.description, `%${query}%`),
+          sql`${query} ILIKE ANY(SELECT unnest(${books.genre})::text)`
+        )
+      )
+      .limit(limit);
+
+    return {
+      success: true,
+      data: result,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      message: "An error occurred while searching books",
     };
   }
 };

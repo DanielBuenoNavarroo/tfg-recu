@@ -1,0 +1,1 @@
+ALTER TABLE "author_requests" ADD COLUMN "status" varchar(20) DEFAULT 'pending';

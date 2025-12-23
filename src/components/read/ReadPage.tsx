@@ -41,6 +41,8 @@ import NextChapterButton from "./NextChapterBtn";
 import BookList from "../BookList";
 import { getCommentsByChapterId } from "@/lib/actions/comments";
 import CommentsSection from "./CommentSection";
+import { hasUserPurchasedBook } from "@/lib/actions/purchases";
+import { redirect } from "next/navigation";
 
 const ReadPage = ({
   bookId,
@@ -80,6 +82,22 @@ const ReadPage = ({
 
     getItems();
   }, [storageKey]);
+
+  useEffect(() => {
+    const data = async () => {
+      if (book && book?.price === 0) {
+        return;
+      }
+      const res = await hasUserPurchasedBook(bookId);
+
+      if (res.success) {
+        if (!res.data) {
+          redirect(`/book/${bookId}/chapters`);
+        }
+      }
+    };
+    data();
+  }, [book, bookId]);
 
   useEffect(() => {
     const prefs = { fontFamily, fontSize };
@@ -247,41 +265,57 @@ const ReadPage = ({
             <p>Chapter list</p>
           </Link>
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"outline"} className="bg-slate-900!">
-              {chapter?.order}-{chapter?.title}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            {chaptersGroups
-              .sort((a, b) => a.order - b.order)
-              .map((group) => (
-                <DropdownMenuGroup key={group.id} className="max-h-80">
-                  <DropdownMenuLabel className="text-sm font-semibold">
-                    <p className="text-base select-none">{group.name}</p>
-                  </DropdownMenuLabel>
-                  {chapters
-                    .filter((c) => c.groupId === group.id)
-                    .sort((a, b) => a.order - b.order)
-                    .map((c) => (
-                      <DropdownMenuItem
-                        key={c.id}
-                        asChild
-                        className={cn(
-                          "truncate-1-lines",
-                          chapter && chapter.id === c.id && "bg-slate-900!"
-                        )}
-                      >
-                        <Link href={`/books/${bookId}/chapters/${c.id}`}>
-                          {c.title}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                </DropdownMenuGroup>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <PrevChapterButton
+            bookId={bookId}
+            chapters={chapters}
+            chaptersGroups={chaptersGroups}
+            chapter={chapter}
+            className="bg-slate-900!"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"outline"} className="bg-slate-900!">
+                {chapter?.order}-{chapter?.title}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              {chaptersGroups
+                .sort((a, b) => a.order - b.order)
+                .map((group) => (
+                  <DropdownMenuGroup key={group.id} className="max-h-80">
+                    <DropdownMenuLabel className="text-sm font-semibold">
+                      <p className="text-base select-none">{group.name}</p>
+                    </DropdownMenuLabel>
+                    {chapters
+                      .filter((c) => c.groupId === group.id)
+                      .sort((a, b) => a.order - b.order)
+                      .map((c) => (
+                        <DropdownMenuItem
+                          key={c.id}
+                          asChild
+                          className={cn(
+                            "truncate-1-lines",
+                            chapter && chapter.id === c.id && "bg-slate-900!"
+                          )}
+                        >
+                          <Link href={`/books/${bookId}/chapters/${c.id}`}>
+                            {c.title}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuGroup>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <NextChapterButton
+            bookId={bookId}
+            chapters={chapters}
+            chaptersGroups={chaptersGroups}
+            chapter={chapter}
+            className="bg-slate-900!"
+          />
+        </div>
       </div>
       <h1 className="text-3xl font-bold mt-8">{chapter?.title}</h1>
       <div className="flex items-center mt-4">

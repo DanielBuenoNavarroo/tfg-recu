@@ -24,7 +24,10 @@ const ColorPicker = ({ onPickerChange, value, url }: Props) => {
         <HexColorPicker color={value} onChange={onPickerChange} />
       </div>
       <div className="hidden sm:block">
-        <BookCover coverColor={value ? value : ""} coverUrl={url} />
+        <BookCover
+          coverColor={value ? value : "#314158"}
+          coverUrl={url && url.trim() !== "" ? url : undefined}
+        />
       </div>
     </div>
   );

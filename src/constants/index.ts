@@ -1,4 +1,4 @@
-import { Book, Bookmark, Home, User, Users } from "lucide-react";
+import { Book, Home, User, Users } from "lucide-react";
 
 export const RECENT_BOOKS_KEY = "recent-books";
 
@@ -7,7 +7,7 @@ export const URL_ADMITED = [
   "m.media-amazon.com",
   "images.unsplash.com",
   "covers.openlibrary.org",
-]
+];
 
 export const libraryLinks = [
   {
@@ -56,13 +56,8 @@ export const adminSideBarLinks = [
     text: "All Books",
   },
   {
-    img: Bookmark,
-    route: "/admin/book-requests",
-    text: "Borrow Requests",
-  },
-  {
     img: User,
-    route: "/admin/account-requests",
-    text: "Account Requests",
+    route: "/admin/author-requests",
+    text: "Author Requests",
   },
 ];

@@ -38,7 +38,7 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<bookSchemaType>({
+  const form = useForm({
     resolver: zodResolver(bookSchema),
     defaultValues: {
       title: selected.title,
@@ -46,6 +46,7 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
       coverImage: selected.cover,
       coverColor: selected.color,
       genre: selected.genre,
+      price: selected.price,
     },
   });
 
@@ -102,8 +103,8 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
       <DialogContent className="px-0 bg-slate-900 max-h-[700px] overflow-y-auto">
         <CustomDialogHeader
           icon={BookA}
-          title="Create a new book"
-          subtitle="Start writing your new book"
+          title="Edit book"
+          subtitle="Modify your as you like"
         />
         <Separator />
         <div className="p-6">
@@ -223,7 +224,11 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
                       <ColorPicker
                         onPickerChange={field.onChange}
                         value={field.value}
-                        url={coverImage.length <= 0 ? undefined : coverImage}
+                        url={
+                          coverImage && coverImage.length <= 0
+                            ? undefined
+                            : coverImage
+                        }
                       />
                     </FormControl>
                     <FormDescription>
@@ -233,6 +238,42 @@ const UpdateBookDialog = ({ selected, setOwnBooks }: Props) => {
                   </FormItem>
                 )}
               />
+
+              {/* Price */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price (€)</FormLabel>
+
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="rounded-r-none"
+                          value={(field.value as number | "") ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                        <span className="px-3 py-2 border border-l-0 rounded-r-md bg-slate-100 text-slate-700">
+                          €
+                        </span>
+                      </div>
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Button type="submit" className="w-full" disabled={isPending}>
                 {!isPending && "Proceed"}
                 {isPending && <Loader2 className="animate-spin" />}

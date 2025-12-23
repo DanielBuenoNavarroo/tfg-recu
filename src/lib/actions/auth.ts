@@ -2,7 +2,7 @@
 
 import { db } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
-import { users } from "@/db/schema";
+import { authorRequests, users } from "@/db/schema";
 import { hash } from "bcryptjs";
 import { auth, signIn, signOut } from "@/auth";
 import { headers } from "next/headers";
@@ -118,5 +118,26 @@ export const GetUserById = async (id: string) => {
   } catch (e) {
     console.error(e);
     return { success: false, error: "Error fetching user" };
+  }
+};
+
+export const hasUserRequestedAuthor = async () => {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Not authenticated");
+    }
+
+    const result = await db
+      .select({ id: authorRequests.id })
+      .from(authorRequests)
+      .where(eq(authorRequests.userId, session.user.id))
+      .limit(1);
+
+    return result.length > 0; // true si ya existe una petición
+  } catch (e) {
+    console.error("Error checking author request:", e);
+    return false;
   }
 };

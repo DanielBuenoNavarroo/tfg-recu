@@ -9,10 +9,41 @@ import Image from "next/image";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import { LogOut } from "lucide-react";
+import { ChevronRight, Divide, LogOut, Search } from "lucide-react";
 import { signOutWithRedirect } from "@/lib/actions/auth";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "./ui/input";
+import { useEffect, useState } from "react";
+import { searchBooks } from "@/lib/actions/book";
+import { books } from "@/db/schema";
+import { Book } from "@/types";
 
 const Header = ({ session }: { session: Session }) => {
+  const [query, setQuery] = useState("");
+  const [books, setBooks] = useState<Book[] | null>(null);
+
+  useEffect(() => {
+    if (query.length < 2) return;
+
+    const timeout = setTimeout(async () => {
+      const res = await searchBooks(query);
+      if (res.success) {
+        setBooks(res.data as unknown as Book[]);
+      } else {
+        console.error(res.message);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [query, setBooks]);
+
   return (
     <header className="my-10 flex justify-between gap-5">
       <Link
@@ -25,8 +56,51 @@ const Header = ({ session }: { session: Session }) => {
           width={50}
           height={50}
         />
+        <p className="text-xl hidden md:block">CHAEK-HON</p>
       </Link>
       <ul className="flex flex-row items-center gap-8">
+        <li>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="gap-2">
+                <Search />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex gap-2 items-center">
+                  <Search size={18} />
+                  Search
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="flex gap-2">
+                <Input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Title, author, genre..."
+                />
+              </div>
+
+              {books && books.length > 0 && (
+                <div className="flex flex-col gap-2 w-full">
+                  {books.map((b) => (
+                    <Link
+                      href={`/books/${b.id}`}
+                      className="w-full p-2 border rounded-md flex items-center justify-between"
+                      key={b.id}
+                    >
+                      {b.title}
+                      <ChevronRight />
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {books && books.length <= 0 && <div>No data found</div>}
+            </DialogContent>
+          </Dialog>
+        </li>
         <li>
           <Link
             href={"/books"}
@@ -106,6 +180,22 @@ const Header = ({ session }: { session: Session }) => {
                   </div>
                 </li>
               </ul>
+              {session.user.role === "DEFAULT" && (
+                <>
+                  <Separator />
+                  <div className="px-1.5 pt-2 text-sm font-bold">Author</div>
+                  <ul className="flex flex-col gap-2 text-sm p-2 w-full">
+                    <li className="w-full">
+                      <Link
+                        href="/become-author"
+                        className="flex hover:text-blue-400"
+                      >
+                        Become Author
+                      </Link>
+                    </li>
+                  </ul>
+                </>
+              )}
               {session.user.role !== "DEFAULT" && (
                 <>
                   <Separator />

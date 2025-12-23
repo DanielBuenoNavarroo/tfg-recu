@@ -14,9 +14,18 @@ const Sidebar = ({ session }: { session: Session }) => {
   return (
     <div className="sticky left-0 top-0 flex h-dvh flex-col justify-between px-5 pb-5 pt-10 border-r-2 border-dashed border-slate-400">
       <div>
-        <div className="flex flex-row items-center max-md:justify-center gap-2 pb-10 border-b-2 border-dashed border-slate-400">
-          <Image src="/images/pattern.webp" alt="logo" height={37} width={37} />
-          <h1 className="text-2xl font-semibold max-md:hidden">App Name</h1>
+        <div className="flex flex-row items-center justify-center max-md:justify-center gap-2 pb-10 border-b-2 border-dashed border-slate-400">
+          <Link
+            href={"/"}
+            className="flex justify-center items-center gap-2 border-b-2 border-slate-400"
+          >
+            <Image
+              src={"/images/studio-logo.webp"}
+              alt="Logo"
+              width={50}
+              height={50}
+            />
+          </Link>
         </div>
         <div className="flex flex-col gap-4 mt-10">
           {adminSideBarLinks.map((link) => {

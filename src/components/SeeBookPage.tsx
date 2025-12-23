@@ -209,6 +209,7 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
             <Button
               className="w-full mt-2 bg-light-200"
               disabled={chapters && chapters.length <= 0}
+              onClick={() => {}}
             >
               Start reading
             </Button>
@@ -253,12 +254,6 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
             <p className="text-lg lg:text-xl text-slate-300">
               {author && author?.fullName}
             </p>
-            <Button
-              variant={"outline"}
-              className="px-3 py-0! text-xs rounded-full bg-slate-950/40!"
-            >
-              Subscribe
-            </Button>
           </div>
           <div className="mt-4 flex gap-2 flex-wrap">
             {book &&
@@ -306,7 +301,7 @@ const SeeBookPage = ({ id, session }: { id: string; session: Session }) => {
             <div className="flex flex-col mt-3">
               {latestChapters?.map((c) => (
                 <Link
-                  href={""}
+                  href={`/books/${id}/read/${c.id}`}
                   key={c.id}
                   className="w-full p-3 hover:bg-slate-800 rounded-md"
                 >

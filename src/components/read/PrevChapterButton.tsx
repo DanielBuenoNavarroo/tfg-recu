@@ -8,15 +8,17 @@ export default function PrevChapterButton({
   chapter,
   chapters,
   chaptersGroups,
+  className
 }: {
   bookId: string;
   chapter?: ChapterType;
   chapters: ChapterType[];
   chaptersGroups: ChapterGroupType[];
+  className?: string;
 }) {
   if (!chapter) {
     return (
-      <Button variant="outline" disabled>
+      <Button variant="outline" disabled className={className}>
         <ChevronLeft />
       </Button>
     );

@@ -9,6 +9,7 @@ import { Book as BookType } from "@/types";
 import Link from "next/link";
 import BookCover from "@/components/BookCover";
 import BookActions from "@/components/BookActions";
+import { redirect } from "next/navigation";
 
 const Page = () => {
   const { data: session } = useSession();
@@ -26,6 +27,12 @@ const Page = () => {
 
     getBooks();
   }, [session]);
+
+  // useEffect(() => {
+  //   if (ownBooks && ownBooks[0].authorId !== session?.user.id) {
+  //     redirect(`/`);
+  //   }
+  // }, [ownBooks, session?.user.id]);
 
   if (!ownBooks || ownBooks.length === 0) {
     return (

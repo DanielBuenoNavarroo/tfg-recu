@@ -27,13 +27,14 @@ export const userSchema = z.object({
 
 export const bookSchema = z.object({
   title: z.string().trim().min(2).max(100),
-  description: z.string().trim().min(2).max(255),
+  description: z.string().trim().min(2),
   genre: z.array(z.enum(GENRE_ENUM.enumValues)).min(1),
   coverImage: z.string().optional(),
   coverColor: z
     .string()
     .trim()
     .regex(/^#[0-9A-F]{6}$/i),
+  price: z.coerce.number().min(0),
 });
 
 export const reviewSchema = z.object({

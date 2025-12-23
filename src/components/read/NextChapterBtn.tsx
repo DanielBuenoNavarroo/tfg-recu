@@ -8,11 +8,13 @@ export default function NextChapterButton({
   chapter,
   chapters,
   chaptersGroups,
+  className,
 }: {
   bookId: string;
   chapter?: ChapterType;
   chapters: ChapterType[];
   chaptersGroups: ChapterGroupType[];
+  className?: string;
 }) {
   if (!chapter) {
     return (
@@ -58,7 +60,7 @@ export default function NextChapterButton({
   }
 
   return nextChapter ? (
-    <Button asChild variant="outline">
+    <Button asChild variant="outline" className={className}>
       <Link href={`/books/${bookId}/chapters/${nextChapter.id}`}>
         <ChevronRight />
       </Link>

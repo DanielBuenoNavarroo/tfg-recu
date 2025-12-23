@@ -42,10 +42,6 @@ const TipTap = ({ chapterId }: Props) => {
     getData();
   }, [chapterId]);
 
-  useEffect(() => {
-    console.log("Chapter: ", chapter);
-  }, [chapter]);
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({

@@ -69,12 +69,12 @@ const AuthForm = <T extends FieldValues>({
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">
-        {isSignIn ? "Welcome back to AppName" : "Create your account"}
+        {isSignIn ? "Welcome back to CHAEK-HON" : "Create your account"}
       </h1>
       <p>
         {isSignIn
           ? "Access the vast collection of resources, and stay updated"
-          : "Please complete all fields and upload a valid university ID to gain access to the library"}
+          : "Please complete all fields to gain access to the library"}
       </p>
       <Form {...form}>
         <form

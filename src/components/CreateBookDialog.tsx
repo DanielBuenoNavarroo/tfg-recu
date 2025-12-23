@@ -37,7 +37,7 @@ const CreateBookDialog = ({ triggerText, setOwnBooks }: Props) => {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  const form = useForm<bookSchemaType>({
+  const form = useForm({
     resolver: zodResolver(bookSchema),
     defaultValues: {
       title: "",
@@ -45,6 +45,7 @@ const CreateBookDialog = ({ triggerText, setOwnBooks }: Props) => {
       coverImage: "",
       coverColor: "#314158",
       genre: [],
+      price: 0,
     },
   });
 
@@ -202,11 +203,53 @@ const CreateBookDialog = ({ triggerText, setOwnBooks }: Props) => {
                       <ColorPicker
                         onPickerChange={field.onChange}
                         value={field.value}
-                        url={coverImage.length <= 0 ? undefined : coverImage}
+                        url={
+                          coverImage && coverImage.length <= 0
+                            ? undefined
+                            : coverImage
+                        }
                       />
                     </FormControl>
                     <FormDescription>
                       Choose a color to your cover.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Price */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex gap-1 items-center">
+                      Price <p className="text-xs text-rose-500">(required)</p>
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="rounded-r-none"
+                          value={(field.value as number | "") ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                        <span className="px-3 py-2 border border-l-0 rounded-r-md bg-slate-100 text-slate-700">
+                          €
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Set the price of your book (up to 2 decimals).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { signOutWithRedirect } from "@/lib/actions/auth";
 import { ChevronRight, Clipboard, Cog, LogOut, User } from "lucide-react";
 import Link from "next/link";
 
@@ -77,7 +78,7 @@ const page = () => {
         </div>
         <div className="bg-slate-900/80 p-6 border rounded-md w-full">
           <div className="flex items-center gap-4">
-            <h1 className="font-semibold text-xl">CHOK-HON</h1>
+            <h1 className="font-semibold text-xl">CHAEK-HON</h1>
           </div>
           <Button
             className="w-full mt-6 flex items-center justify-between min-h-12 border"
@@ -116,12 +117,15 @@ const page = () => {
           </Button>
         </div>
         <Separator className="mt-2 mb-2" />
-        <Button
-          variant={"destructive"}
-          className="w-full text-base bg-red-700! hover:bg-red-500!"
-        >
-          <LogOut /> Log out
-        </Button>
+        <form action={signOutWithRedirect} className="w-full">
+          <Button
+            variant={"destructive"}
+            className="w-full text-base bg-red-700! hover:bg-red-500!"
+            type="submit"
+          >
+            <LogOut /> Log out
+          </Button>
+        </form>
       </div>
     </div>
   );
